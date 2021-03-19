@@ -11,7 +11,7 @@ class Cast extends Component {
     const { movieId } = this.props.match.params;
     const response = await api.fetchCast(movieId);
     this.setState({ cast: [...response.data.cast] });
-    console.log(response.data.cast);
+    // console.log(response.data.cast);
   }
 
   render() {

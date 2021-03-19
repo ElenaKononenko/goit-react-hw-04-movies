@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import s from './Navigation.module.css';
+import routes from '../../routes';
 const Navigation = () => {
   return (
     <div className={s.Navigation}>
@@ -8,7 +9,7 @@ const Navigation = () => {
         <li>
           <NavLink
             exact
-            to="/"
+            to={routes.home}
             className={s.listItem}
             activeClassName={s.activeLink}
           >
@@ -18,7 +19,7 @@ const Navigation = () => {
         <li>
           <NavLink
             exact
-            to="/movies"
+            to={routes.movies}
             className={s.listItem}
             activeClassName={s.activeLink}
           >

@@ -1,15 +1,16 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
+
 import Button from '../../components/Button';
+import MovieList from '../../components/MovieList';
 import api from '../../services/movieApi';
-import s from './MoviesPage.module.css';
-import image from '../../images/noPoster.jpg';
+
 class MoviesPage extends Component {
   state = {
     movies: [],
     query: '',
     page: 1,
     total: null,
+    error: '',
   };
 
   componentDidUpdate(prevProps, prevState) {
@@ -30,15 +31,20 @@ class MoviesPage extends Component {
       .then(res => {
         if (res.results.length === 0) {
           this.setState({ movies: [] });
+        } else {
+          this.setState(prevState => ({
+            movies: [...prevState.movies, ...res.results],
+            page: prevState.page + 1,
+            total: res.total_pages,
+          }));
         }
-        console.log(res);
-        this.setState(prevState => ({
-          movies: [...prevState.movies, ...res.results],
-          page: prevState.page + 1,
-          total: res.total_pages,
-        }));
+
+        // console.log(res);
       })
-      .catch(error => this.state({ error }));
+      .catch(error => {
+        this.setState({ error });
+        return console.log(error);
+      });
   };
   submitQuery = e => {
     e.preventDefault();
@@ -51,7 +57,6 @@ class MoviesPage extends Component {
   };
 
   render() {
-    const posterUrl = 'https://image.tmdb.org/t/p/w500';
     const { movies, total, page } = this.state;
     return (
       <>
@@ -63,29 +68,7 @@ class MoviesPage extends Component {
         </form>
         {movies.length > 0 ? (
           <>
-            <ul className={s.MoviePage}>
-              {movies.map(({ backdrop_path, id, title }) => {
-                let poster = backdrop_path
-                  ? `${posterUrl}${backdrop_path}`
-                  : image;
-                return (
-                  <li key={id}>
-                    <Link to={`${this.props.match.url}/${id}`}>
-                      <div className={s.MoviePage_item}>
-                        <p> {title}</p>
-                        <img
-                          className={s.picture}
-                          src={poster}
-                          alt={title}
-                          width="100"
-                          height="auto"
-                        />
-                      </div>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
+            <MovieList movie={movies} />
             {page <= total && <Button onClick={this.fetchMovie} />}
           </>
         ) : (

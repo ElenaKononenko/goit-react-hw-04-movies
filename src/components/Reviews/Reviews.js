@@ -10,7 +10,7 @@ class Reviews extends Component {
     const { movieId } = this.props.match.params;
     const response = await api.fetchReviews(movieId);
     this.setState({ reviews: response.data.results });
-    console.log(response.data.results);
+    // console.log(response.data.results);
   }
 
   render() {
