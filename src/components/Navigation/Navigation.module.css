@@ -1,0 +1,19 @@
+.Navigation {
+  height: 60px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  background-color: rgb(20, 181, 192);
+}
+.list {
+  display: flex;
+  justify-content: left;
+  align-items: center;
+  height: 60px;
+
+  padding: 20px;
+}
+.listItem {
+  margin-right: 20px;
+}
+.activeLink {
+  color: rgb(231, 31, 148);
+}
