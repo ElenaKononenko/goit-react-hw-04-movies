@@ -4,12 +4,13 @@ import MoviePreview from '../MoviePreview';
 import { Link, withRouter } from 'react-router-dom';
 import s from './MovieList.module.css';
 
-const MovieList = ({ movie, location }) => {
+const MovieList = ({ movie, location, onClick }) => {
   return (
     <ul className={s.MovieList}>
       {movie.map(({ backdrop_path, id, title }) => (
         <li key={id}>
           <Link
+            onClick={() => onClick()}
             to={{
               pathname: `/movies/${id}`,
               state: {
@@ -34,4 +35,5 @@ MovieList.propTypes = {
     }),
   ).isRequired,
   location: PropTypes.object.isRequired,
+  onClick: PropTypes.func.isRequired,
 };

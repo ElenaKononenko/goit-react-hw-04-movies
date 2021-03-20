@@ -9,8 +9,16 @@ class HomePage extends Component {
     page: 1,
   };
   componentDidMount() {
-    this.setState({ page: 1 });
-    this.fetchMovie();
+    const storedState = localStorage.getItem('storedState');
+    localStorage.removeItem('storedState');
+    if (storedState) {
+      console.log(JSON.parse(storedState));
+      let cat = JSON.parse(storedState);
+      this.setState({ ...cat });
+    } else {
+      this.setState({ page: 1 });
+      this.fetchMovie();
+    }
   }
   componentDidUpdate(prevProps, prevState) {
     const { page } = this.state;
@@ -38,12 +46,15 @@ class HomePage extends Component {
       })
       .catch(error => this.state({ error }));
   };
+  saveState = () => {
+    localStorage.setItem('storedState', JSON.stringify(this.state));
+  };
   render() {
     const { popularMovie } = this.state;
     return (
       <>
         <h1>Trending today</h1>
-        <MovieList movie={popularMovie} />
+        <MovieList movie={popularMovie} onClick={this.saveState} />
         <Button onClick={this.fetchMovie} />
       </>
     );

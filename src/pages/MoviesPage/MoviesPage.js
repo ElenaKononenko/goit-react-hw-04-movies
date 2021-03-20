@@ -11,11 +11,26 @@ class MoviesPage extends Component {
     page: 1,
     total: null,
     error: '',
+    isLoadedState: false,
   };
+  componentDidMount() {
+    const storedState = localStorage.getItem('storedState');
+    localStorage.removeItem('storedState');
+    if (storedState) {
+      console.log(JSON.parse(storedState));
+      let loadedState = JSON.parse(storedState);
+      loadedState.isLoadedState = true;
+      this.setState({ ...loadedState });
+    }
+  }
 
   componentDidUpdate(prevProps, prevState) {
-    if (this.state.query !== prevState.query) {
-      this.fetchMovie();
+    if (this.state.isLoadedState) {
+      this.setState({ isLoadedState: false });
+    } else {
+      if (this.state.query !== prevState.query) {
+        this.fetchMovie();
+      }
     }
 
     window.scrollTo({
@@ -23,6 +38,10 @@ class MoviesPage extends Component {
       behavior: 'smooth',
     });
   }
+
+  saveState = () => {
+    localStorage.setItem('storedState', JSON.stringify(this.state));
+  };
 
   fetchMovie = () => {
     const { query, page } = this.state;
@@ -34,8 +53,8 @@ class MoviesPage extends Component {
         } else {
           this.setState(prevState => ({
             movies: [...prevState.movies, ...res.results],
-            page: prevState.page + 1,
             total: res.total_pages,
+            page: prevState.page + 1,
           }));
         }
 
@@ -55,7 +74,12 @@ class MoviesPage extends Component {
       this.setState({ query: value, page: 1, total: null, movies: [] });
     }
   };
-
+  // handleBtn = () => {
+  //   this.setState(prevState => ({
+  //     page: prevState.page + 1,
+  //   }));
+  //   this.fetchMovie();
+  // };
   render() {
     const { movies, total, page } = this.state;
     return (
@@ -68,7 +92,7 @@ class MoviesPage extends Component {
         </form>
         {movies.length > 0 ? (
           <>
-            <MovieList movie={movies} />
+            <MovieList movie={movies} onClick={this.saveState} />
             {page <= total && <Button onClick={this.fetchMovie} />}
           </>
         ) : (
