@@ -36,6 +36,7 @@ async function fetchReviews(movie_id) {
   console.log(response);
   return response;
 }
+// eslint-disable-next-line
 export default {
   fetchTrending,
   fetchSearch,

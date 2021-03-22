@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import Button from '../../components/Button';
 import MovieList from '../../components/MovieList';
 import api from '../../services/movieApi';
+import queryString from 'query-string';
 
 class MoviesPage extends Component {
   state = {
@@ -11,26 +12,20 @@ class MoviesPage extends Component {
     page: 1,
     total: null,
     error: '',
-    isLoadedState: false,
   };
   componentDidMount() {
-    const storedState = localStorage.getItem('storedState');
-    localStorage.removeItem('storedState');
-    if (storedState) {
-      console.log(JSON.parse(storedState));
-      let loadedState = JSON.parse(storedState);
-      loadedState.isLoadedState = true;
-      this.setState({ ...loadedState });
+    const parsed = queryString.parse(this.props.location.search);
+    if (parsed.q) {
+      this.setState({ page: Number(parsed.p), query: parsed.q });
     }
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (this.state.isLoadedState) {
-      this.setState({ isLoadedState: false });
-    } else {
-      if (this.state.query !== prevState.query) {
-        this.fetchMovie();
-      }
+    if (
+      this.state.query !== prevState.query ||
+      this.state.page !== prevState.page
+    ) {
+      this.fetchMovie();
     }
 
     window.scrollTo({
@@ -38,10 +33,6 @@ class MoviesPage extends Component {
       behavior: 'smooth',
     });
   }
-
-  saveState = () => {
-    localStorage.setItem('storedState', JSON.stringify(this.state));
-  };
 
   fetchMovie = () => {
     const { query, page } = this.state;
@@ -54,11 +45,18 @@ class MoviesPage extends Component {
           this.setState(prevState => ({
             movies: [...prevState.movies, ...res.results],
             total: res.total_pages,
-            page: prevState.page + 1,
           }));
-        }
 
-        // console.log(res);
+          this.props.location.search = queryString.stringify({
+            q: query,
+            p: page,
+          });
+
+          this.props.history.push({
+            pathname: this.props.location.pathname,
+            search: this.props.location.search,
+          });
+        }
       })
       .catch(error => {
         this.setState({ error });
@@ -74,12 +72,11 @@ class MoviesPage extends Component {
       this.setState({ query: value, page: 1, total: null, movies: [] });
     }
   };
-  // handleBtn = () => {
-  //   this.setState(prevState => ({
-  //     page: prevState.page + 1,
-  //   }));
-  //   this.fetchMovie();
-  // };
+  handleBtn = () => {
+    this.setState(prevState => ({
+      page: prevState.page + 1,
+    }));
+  };
   render() {
     const { movies, total, page } = this.state;
     return (
@@ -92,8 +89,8 @@ class MoviesPage extends Component {
         </form>
         {movies.length > 0 ? (
           <>
-            <MovieList movie={movies} onClick={this.saveState} />
-            {page <= total && <Button onClick={this.fetchMovie} />}
+            <MovieList movie={movies} />
+            {page <= total && <Button onClick={this.handleBtn} />}
           </>
         ) : (
           <h2>Введите запрос</h2>

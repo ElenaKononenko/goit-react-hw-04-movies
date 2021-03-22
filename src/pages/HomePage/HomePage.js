@@ -2,19 +2,16 @@ import React, { Component } from 'react';
 import MovieList from '../../components/MovieList';
 import Button from '../../components/Button';
 import api from '../../services/movieApi';
-
+import queryString from 'query-string';
 class HomePage extends Component {
   state = {
     popularMovie: [],
     page: 1,
   };
   componentDidMount() {
-    const storedState = localStorage.getItem('storedState');
-    localStorage.removeItem('storedState');
-    if (storedState) {
-      console.log(JSON.parse(storedState));
-      let cat = JSON.parse(storedState);
-      this.setState({ ...cat });
+    const parsed = queryString.parse(this.props.location.search);
+    if (Number(parsed.p) > 1) {
+      this.setState({ page: Number(parsed.p) });
     } else {
       this.setState({ page: 1 });
       this.fetchMovie();
@@ -22,6 +19,10 @@ class HomePage extends Component {
   }
   componentDidUpdate(prevProps, prevState) {
     const { page } = this.state;
+    if (this.state.page !== prevState.page) {
+      this.fetchMovie();
+    }
+
     if (page > 2) {
       window.scrollTo({
         top: document.documentElement.scrollHeight,
@@ -41,21 +42,30 @@ class HomePage extends Component {
 
         this.setState(prevState => ({
           popularMovie: [...prevState.popularMovie, ...res.results],
-          page: prevState.page + 1,
         }));
+        this.props.location.search = queryString.stringify({
+          p: page,
+        });
+
+        this.props.history.push({
+          pathname: this.props.location.pathname,
+          search: this.props.location.search,
+        });
       })
       .catch(error => this.state({ error }));
   };
-  saveState = () => {
-    localStorage.setItem('storedState', JSON.stringify(this.state));
+  handleBtn = () => {
+    this.setState(prevState => ({
+      page: prevState.page + 1,
+    }));
   };
   render() {
     const { popularMovie } = this.state;
     return (
       <>
         <h1>Trending today</h1>
-        <MovieList movie={popularMovie} onClick={this.saveState} />
-        <Button onClick={this.fetchMovie} />
+        <MovieList movie={popularMovie} />
+        <Button onClick={this.handleBtn} />
       </>
     );
   }
